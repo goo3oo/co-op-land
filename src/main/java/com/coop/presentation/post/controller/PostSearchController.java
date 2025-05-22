@@ -1,11 +1,9 @@
 package com.coop.presentation.post.controller;
 
-import com.coop.domain.post.enums.PostCategory;
-import com.coop.domain.post.service.PostEsService;
 import com.coop.domain.post.service.PostSearchService;
 import com.coop.global.common.ApiResponse;
 import com.coop.presentation.post.dto.response.PostDocPageResponse;
-import com.coop.presentation.post.dto.response.PostSearchResponse;
+import com.coop.presentation.post.dto.response.PostPageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,15 +14,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/search")
 @RequiredArgsConstructor
 public class PostSearchController {
 
     private final PostSearchService postSearchService;
-    private final PostEsService postEsService;
 
     @GetMapping("/posts")
     public ResponseEntity<ApiResponse<PostDocPageResponse>> readPostsBySearching(
@@ -42,32 +37,42 @@ public class PostSearchController {
         return ApiResponse.success(responseDto);
     }
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<PostSearchResponse>>> readPostBySearch(
-            @RequestParam String keyword
+    @GetMapping("/like")
+    public ResponseEntity<ApiResponse<PostPageResponse>> readPostsByLike(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String keyword
     ) {
-        return ApiResponse.success(postSearchService.findPostByKeyword(keyword));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("updatedAt").descending());
+        PostPageResponse responseDto =
+                postSearchService.getPostsByLike(pageable, keyword);
+
+        return ApiResponse.success(responseDto);
     }
 
-    @GetMapping("/fulltext-index/boolean-mode")
-    public ResponseEntity<ApiResponse<List<PostSearchResponse>>> readPostBySearchFromKeywordByBoolean(
-            @RequestParam String keyword
+    @GetMapping("/full-text-natural")
+    public ResponseEntity<ApiResponse<PostPageResponse>> readPostsByFullTextNatural(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String keyword
     ) {
-        return ApiResponse.success(postSearchService.searchPostsByBooleanMode(keyword));
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("updated_at").descending());
+        PostPageResponse responseDto =
+                postSearchService.getPostsByFullTextNaturalLanguage(pageable, keyword);
+
+        return ApiResponse.success(responseDto);
     }
 
-    @GetMapping("/fulltext-index/natural-language-mode")
-    public ResponseEntity<ApiResponse<List<PostSearchResponse>>> readPostBySearchFromKeywordByNaturalLanguage(
-            @RequestParam String keyword
+    @GetMapping("/full-text-boolean")
+    public ResponseEntity<ApiResponse<PostPageResponse>> readPostsByFullTextBoolean(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "15") int size,
+            @RequestParam(required = false) String keyword
     ) {
-        return ApiResponse.success(postSearchService.searchPostsByNaturalLanguageMode(keyword));
-    }
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("updated_at").descending());
+        PostPageResponse responseDto =
+                postSearchService.getPostsByFullTextBoolean(pageable, keyword);
 
-    @GetMapping("/fi/category")
-    public ResponseEntity<ApiResponse<List<PostSearchResponse>>> readPostBySearchFromKeywordAndCategory(
-            @RequestParam String keyword,
-            @RequestParam PostCategory category
-    ) {
-        return ApiResponse.success(postSearchService.searchPostsByCategory(keyword, category));
+        return ApiResponse.success(responseDto);
     }
 }
