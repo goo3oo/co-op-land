@@ -6,9 +6,9 @@ import org.springframework.data.domain.Page;
 import java.util.List;
 
 @Builder
-public record PostPageResponse(List<PostsResponse> posts, int currentPage, int totalPages, boolean hasNext) {
-    public static PostPageResponse from(Page<PostsResponse> pageResponse) {
-        return PostPageResponse.builder()
+public record PostPageResponse<T>(List<T> posts, int currentPage, int totalPages, boolean hasNext) {
+    public static <T> PostPageResponse<T> from(Page<T> pageResponse) {
+        return PostPageResponse.<T>builder()
                 .posts(pageResponse.getContent())
                 .currentPage(pageResponse.getNumber())
                 .totalPages(pageResponse.getTotalPages())
