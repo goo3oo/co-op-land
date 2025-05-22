@@ -12,6 +12,6 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity extends InitEntity {
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 }
